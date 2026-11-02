@@ -180,6 +180,3 @@ This repository ships a runnable slice of the design.
 2. The resolution and the scoring SQL are in `sql/`.
 3. The serving API is in `services/api/`.
 4. The thin web app is in `web/`.
-
-This document describes the fast lane, the orchestrator, and the warehouse
-engines. The repository does not build them yet.
