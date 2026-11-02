@@ -1,0 +1,9 @@
+[project]
+name = "shodan-ingest"
+version = "0.1.0"
+description = "Incremental, idempotent GCS-to-Parquet ingestion of Shodan scan files."
+requires-python = ">=3.11"
+dependencies = [
+    "duckdb>=1.1",
+    "google-cloud-storage>=2.18",
+]
