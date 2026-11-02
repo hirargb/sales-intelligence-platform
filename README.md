@@ -1,4 +1,4 @@
-# Account Prioritizer
+# Sales Intelligence Platform
 
 This tool ranks the companies most likely to buy cybersecurity software. The
 input is internet-scan data. The output is a ranked company list. Each company

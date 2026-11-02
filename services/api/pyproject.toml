@@ -1,5 +1,5 @@
 [project]
-name = "account-prioritizer-api"
+name = "sales-intelligence-api"
 version = "0.1.0"
 description = "FastAPI service that serves ranked companies from the scored Parquet."
 requires-python = ">=3.11"

@@ -1,4 +1,4 @@
-# Account Prioritizer API
+# Sales Intelligence API
 
 This service serves the ranked companies from the scored Parquet. DuckDB reads
 the Parquet directly. Therefore no database runs, and queries return in
@@ -69,7 +69,7 @@ All settings take the `APP_` prefix, for example `APP_POOL_SIZE=8`.
 ## Deploy to Cloud Run
 
 ```
-gcloud run deploy account-prioritizer-api --source . \
+gcloud run deploy firmable-api --source . \
   --region us-central1 --allow-unauthenticated --memory 1Gi
 ```
 

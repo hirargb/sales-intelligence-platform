@@ -56,7 +56,7 @@ export default async function Page({
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold">Account Prioritizer</h1>
+        <h1 className="text-2xl font-semibold">Sales Intelligence Platform</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted">
           The companies most likely to need cybersecurity help, ranked from
           their exposed internet footprint, with the reason each one ranks.

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Account Prioritizer",
+  title: "Sales Intelligence Platform",
   description:
     "Rank the companies most likely to need cybersecurity help, with the reason each one ranks.",
 };

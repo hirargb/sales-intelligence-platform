@@ -44,7 +44,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         pool.close()
 
     app = FastAPI(
-        title="Account Prioritizer API",
+        title="Sales Intelligence API",
         version=__version__,
         summary="Ranked companies most likely to buy cybersecurity software.",
         lifespan=lifespan,
