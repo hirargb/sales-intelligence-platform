@@ -40,8 +40,6 @@ class Settings(BaseSettings):
     # so this matters only for a direct browser client.
     cors_origins: list[str] = Field(default_factory=lambda: ["*"])
 
-    max_page_size: int = Field(default=200, ge=1)
-
 
 @lru_cache
 def get_settings() -> Settings:

@@ -56,11 +56,3 @@ ARCHITECTURE.md  System design and diagrams.
 1. The API and the web app deploy to Cloud Run from source.
 2. Buildpacks build the image in the cloud. No local container runtime is needed.
 3. See `services/api/README.md` for the deploy command.
-
-## Render the diagrams
-
-GitHub renders Mermaid in Markdown automatically. To render the diagrams on your
-machine, do one step.
-
-1. Install the Mermaid CLI. Run: yarn global add @mermaid-js/mermaid-cli
-2. Or install the VS Code extension "Markdown Preview Mermaid Support".

@@ -183,19 +183,3 @@ This repository ships a runnable slice of the design.
 
 The fast lane, the orchestrator, and the warehouse engines are in this document.
 They are the next build. They are not simulated.
-
-## What the design does not build
-
-1. It does not use Kafka. It does not run an always-on Spark cluster at this
-   scale.
-2. It does not stream without a reason. Daily batch meets a sales team need.
-3. It earns each lane. Batch comes first. The event-driven silver lane comes when
-   freshness demands it. The speed layer comes only for aggregate reconciliation.
-
-## Render the diagrams
-
-GitHub renders Mermaid in Markdown automatically. To render the diagrams on your
-machine, do one step.
-
-1. Install the Mermaid CLI. Run: yarn global add @mermaid-js/mermaid-cli
-2. Or install the VS Code extension "Markdown Preview Mermaid Support".
