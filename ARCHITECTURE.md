@@ -1,8 +1,8 @@
 # Architecture
 
-This document shows how the system works. It shows how the system grows from one
-scan file to one thousand files each month. It does not reprocess the full
-corpus to add one file.
+This document describes the system and how it scales. The system grows from one
+scan file to one thousand files each month. The system adds a new file without a
+reprocess of the full corpus.
 
 ## The constraint that drives the design
 
@@ -11,12 +11,11 @@ One fact controls the design.
 
 > The strongest signals are global aggregates. They are not per-record facts.
 
-Resolution shows this fact. The rule finds hosting. A domain on more than 500
-distinct IP addresses is a host, not a company. You compute this rule across the
-full corpus. You cannot compute it from one file. Several score features behave
-the same way. Therefore one file alone cannot give a final score. This fact is
-the reason for two lanes. The reason is aggregation scope. The reason is not
-speed.
+Resolution is the clearest example. A domain on more than 500 distinct IP
+addresses is a host, not a company. You compute this rule across the full
+corpus, not from one file. Several score features behave the same way. Therefore
+one file alone cannot give a final score. This need for a corpus-wide view is the
+reason for two lanes, not a need for speed.
 
 A naive pipeline sends the file to a language model. It then ranks by
 vulnerability count. That approach ranks hosting providers. Hosts carry the most
@@ -26,13 +25,13 @@ banners and the most CVE records. The resolution layer removes the hosts.
 
 ```mermaid
 flowchart LR
-  subgraph Bronze["Bronze — raw"]
+  subgraph Bronze["Bronze: raw"]
     A["Scan files<br/>GCS inbox"]
   end
-  subgraph Silver["Silver — facts"]
+  subgraph Silver["Silver: facts"]
     B["Per-file Parquet<br/>one row per banner"]
   end
-  subgraph Gold["Gold — entities and scores"]
+  subgraph Gold["Gold: entities and scores"]
     C["Resolve entities"] --> D["Score need and fit<br/>attach reasons"]
   end
   subgraph Serve["Serving"]
@@ -107,8 +106,7 @@ flowchart LR
    provisional score.
 3. The serving layer merges the authoritative gold with the provisional deltas.
 
-This pattern is Lambda architecture. The global-aggregate need justifies it. A
-demand for sub-second data does not justify it.
+This pattern is Lambda architecture. The global-aggregate need justifies it here.
 
 ## API request flow
 
@@ -146,7 +144,7 @@ The pipeline processes each file once. The content hash is the key.
 
 ```mermaid
 flowchart TD
-  F["File lands in inbox"] --> H["Read content hash — md5"]
+  F["File lands in inbox"] --> H["Read content hash (md5)"]
   H --> Q{"Hash in manifest?"}
   Q -- "yes" --> SKIP["Skip the file"]
   Q -- "no" --> T["Transform to Parquet"]
@@ -169,8 +167,7 @@ flowchart TD
 | gold    | BigQuery or Spark / Dataflow | Global joins and aggregates run at terabyte scale.       |
 | serving | DuckDB over a small Parquet  | The read is millisecond fast. No database runs.          |
 
-The system uses the right tool for each layer. It does not use one engine for
-all layers.
+The system uses the right tool for each layer.
 
 ## What this repository ships
 

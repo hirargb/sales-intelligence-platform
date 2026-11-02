@@ -1,7 +1,7 @@
 # Account Prioritizer API
 
-FastAPI service that serves the ranked companies from the scored Parquet. DuckDB
-reads the Parquet directly, so there is no database to run and queries return in
+This service serves the ranked companies from the scored Parquet. DuckDB reads
+the Parquet directly. Therefore no database runs, and queries return in
 milliseconds.
 
 ## Structure
@@ -11,11 +11,11 @@ app/
   main.py              App factory. Builds the pool, repo, limiter; wires routes.
   config.py            Pydantic settings, loaded and validated from the environment.
   logging.py           Structured JSON logs for Cloud Run.
-  db/pool.py           Bounded DuckDB connection pool with a borrow/return context.
+  db/pool.py           Bounded DuckDB connection pool with a borrow and return context.
   models/schemas.py    Request and response models. The API contract.
   core/rate_limit.py   Token-bucket limiter, per client.
   core/decorators.py   timed() and ttl_cache() for the service layer.
-  core/errors.py       Exception handlers; clean JSON, no leaked traces.
+  core/errors.py       Exception handlers. Clean JSON, no leaked traces.
   repositories/        Data access. Owns every SQL string and the pool.
   api/routes/          Typed endpoints: health, stats, markets, companies.
 tests/                 Contract tests over the real scored Parquet.
@@ -23,17 +23,18 @@ tests/                 Contract tests over the real scored Parquet.
 
 ## Design notes
 
-- **Connection pool.** One DuckDB connection is not safe for concurrent queries.
-  The pool holds a fixed set of connections, each with a read-only view over the
-  Parquet. A request borrows one and returns it. The pool bounds concurrency and
-  removes the per-request cost of opening a connection.
-- **Rate limit.** A token bucket per client, in process. The right scope for one
-  Cloud Run instance; a multi-instance deployment moves this to a shared store.
-- **Caching.** The two near-static reads are cached for a short window, so a
-  burst of dashboard loads does not re-run the same aggregate.
-- **Validation.** Every query is validated against a Pydantic model, so a bad
-  parameter is a 422, not a surprise deep in a query. Sort is a closed enum, so
-  the sort column cannot inject SQL.
+- Connection pool. One DuckDB connection is not safe for concurrent queries. The
+  pool holds a fixed set of connections. Each connection holds a read-only view
+  over the Parquet. A request borrows one connection and returns it. The pool
+  bounds concurrency and removes the cost to open a connection per request.
+- Rate limit. Each client gets a token bucket in process. This scope suits one
+  Cloud Run instance. A multi-instance deployment moves the state to a shared
+  store.
+- Cache. The service caches the two near-static reads for a short window. A burst
+  of dashboard loads does not re-run the same aggregate.
+- Validation. The service validates every query against a Pydantic model. A bad
+  value returns HTTP 422. Sort is a closed enum, so the sort column cannot inject
+  SQL.
 
 ## Run locally
 
@@ -56,14 +57,14 @@ pytest
 
 All settings take the `APP_` prefix, for example `APP_POOL_SIZE=8`.
 
-| Variable                   | Default              | Meaning                              |
-| -------------------------- | -------------------- | ------------------------------------ |
-| `APP_SCORED_PARQUET`       | `data/scored.parquet`| Path to the scored companies.        |
-| `APP_POOL_SIZE`            | `4`                  | DuckDB connections in the pool.      |
-| `APP_RATE_LIMIT_RPM`       | `120`                | Steady request rate per client.      |
-| `APP_RATE_LIMIT_BURST`     | `40`                 | Bucket depth per client.             |
-| `APP_STATS_CACHE_TTL`      | `30`                 | Cache window for stats and markets.  |
-| `APP_CORS_ORIGINS`         | `["*"]`              | Browser origins allowed to call.     |
+| Variable               | Default               | Meaning                             |
+| ---------------------- | --------------------- | ----------------------------------- |
+| `APP_SCORED_PARQUET`   | `data/scored.parquet` | Path to the scored companies.       |
+| `APP_POOL_SIZE`        | `4`                   | DuckDB connections in the pool.     |
+| `APP_RATE_LIMIT_RPM`   | `120`                 | Steady request rate per client.     |
+| `APP_RATE_LIMIT_BURST` | `40`                  | Bucket depth per client.            |
+| `APP_STATS_CACHE_TTL`  | `30`                  | Cache window for stats and markets. |
+| `APP_CORS_ORIGINS`     | `["*"]`               | Browser origins allowed to call.    |
 
 ## Deploy to Cloud Run
 
