@@ -1,5 +1,7 @@
 # Sales Intelligence Platform
 
+Live app: https://sales-intelligence-platform-htvlzb7ksq-uc.a.run.app
+
 This tool ranks the companies most likely to buy cybersecurity software. The
 input is internet-scan data. The output is a ranked company list. Each company
 shows a plain reason for its rank.
