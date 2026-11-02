@@ -19,7 +19,7 @@ flowchart LR
 ```
 
 The full architecture, the fast and slow lanes, the request flow, and the
-idempotency flow are in `ARCHITECTURE.md`.
+idempotency flow are in `docs/ARCHITECTURE.md`.
 
 ## Repository layout
 
@@ -28,28 +28,25 @@ pipeline/        Ingest raw scan files to curated Parquet. Streaming, idempotent
 sql/             Resolve entities, then score. Attach a reason list to each company.
 services/api/    FastAPI serving layer. Connection pool, rate limit, Pydantic contract, tests.
 web/             Thin Next.js app. Server-rendered account list for the sales team.
-signals.md       Ranked signal thesis: each signal, its evidence, and its weight.
-data-profile.md  By-hand profile of the full file: schema, fill rates, measured signals.
-MEASUREMENT.md   Ranking-quality measurement: precision at k, lift, signal contribution.
-DEVLOG.md        How it was built, what was checked, and where it was caught wrong.
-ARCHITECTURE.md  System design and diagrams.
+eval/            Reproducible ranking-quality measurement script and sample.
+docs/            Write-up: signals, data profile, architecture, measurement, dev log.
 ```
 
 ## How the parts map to the grade
 
-1. Signal insight. See `signals.md` for the ranked signal thesis and
-   `data-profile.md` for the by-hand profile. The main finding: resolve before
-   you score, or you rank hosting providers. The resolution and scoring run in
-   `sql/30_resolve.sql` and `sql/40_score.sql`.
+1. Signal insight. See `docs/signals.md` for the ranked signal thesis and
+   `docs/data-profile.md` for the by-hand profile. The main finding: resolve
+   before you score, or you rank hosting providers. The resolution and scoring
+   run in `sql/30_resolve.sql` and `sql/40_score.sql`.
 2. Ingestion that scales. See `pipeline/`. The worker runs per file. It is
    idempotent by content hash. It is incremental.
 3. Transparent scoring. The need score and the fit score are separate. Each
    point maps to a named signal. Each company carries a reason list.
 4. Measurement. The API and the SQL scoring have contract tests in
    `services/api/tests/`. The ranking-quality measurement, precision at k, lift,
-   and signal contribution, is in `MEASUREMENT.md` and `eval/`.
+   and signal contribution, is in `docs/MEASUREMENT.md` and `eval/`.
 5. Dev loop. How AI was used, what was checked, and where it was caught wrong, is
-   in `DEVLOG.md`.
+   in `docs/DEVLOG.md`.
 6. Thin app. See `web/`. The app is one screen. It is the least important part by
    design.
 
