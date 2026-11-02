@@ -30,6 +30,8 @@ services/api/    FastAPI serving layer. Connection pool, rate limit, Pydantic co
 web/             Thin Next.js app. Server-rendered account list for the sales team.
 signals.md       Ranked signal thesis: each signal, its evidence, and its weight.
 data-profile.md  By-hand profile of the full file: schema, fill rates, measured signals.
+MEASUREMENT.md   Ranking-quality measurement: precision at k, lift, signal contribution.
+DEVLOG.md        How it was built, what was checked, and where it was caught wrong.
 ARCHITECTURE.md  System design and diagrams.
 ```
 
@@ -44,9 +46,11 @@ ARCHITECTURE.md  System design and diagrams.
 3. Transparent scoring. The need score and the fit score are separate. Each
    point maps to a named signal. Each company carries a reason list.
 4. Measurement. The API and the SQL scoring have contract tests in
-   `services/api/tests/`. The ranking-quality plan, a hand-labelled set and
-   precision at k, is in `signals.md` and `data-profile.md`.
-5. Thin app. See `web/`. The app is one screen. It is the least important part by
+   `services/api/tests/`. The ranking-quality measurement, precision at k, lift,
+   and signal contribution, is in `MEASUREMENT.md` and `eval/`.
+5. Dev loop. How AI was used, what was checked, and where it was caught wrong, is
+   in `DEVLOG.md`.
+6. Thin app. See `web/`. The app is one screen. It is the least important part by
    design.
 
 ## Run
@@ -61,3 +65,18 @@ ARCHITECTURE.md  System design and diagrams.
 1. The API and the web app deploy to Cloud Run from source.
 2. Buildpacks build the image in the cloud. No local container runtime is needed.
 3. See `services/api/README.md` for the deploy command.
+
+## LLMs: where and why
+
+The ranking uses no language model. The signals are deterministic, so they are
+cheap, fast, and auditable. The brief warns that the best signals do not appear
+if you hand the file to a language model, and the measurement confirms that the
+deterministic signals rank the companies well.
+
+Cost. The ranking path spends no model tokens. It is SQL over Parquet.
+
+Where a language model would add value: firmographic enrichment. A tool could
+read a company certificate name and hostnames and return a structured industry
+and size band. It would be a named, versioned tool, with a schema, a cost
+ceiling, a trace, and an eval set. It would stay out of the ranking and only
+label a company for a filter. This is the next build.
