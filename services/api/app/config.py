@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     # Response cache for the two near-static endpoints.
     stats_cache_ttl: float = Field(default=30.0, ge=0)
 
+    # Minimum Jaro-Winkler similarity for a fuzzy company-name match.
+    search_fuzzy_threshold: float = Field(default=0.7, ge=0, le=1)
+
     # Browsers that may call the API directly. The web app calls it server side,
     # so this matters only for a direct browser client.
     cors_origins: list[str] = Field(default_factory=lambda: ["*"])

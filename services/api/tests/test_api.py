@@ -64,6 +64,21 @@ def test_bad_sort_rejected(client):
     assert client.get("/api/companies?sort=company").status_code == 422
 
 
+def test_fuzzy_search_tolerates_typo(client):
+    # Take a real company, swap two adjacent characters, and expect the fuzzy
+    # search to still find it.
+    first = client.get("/api/companies?limit=1").json()["items"][0]["company"]
+    if len(first) < 4:
+        return
+    i = len(first) // 2
+    typo = first[:i] + first[i + 1] + first[i] + first[i + 2 :]
+    assert typo != first
+    r = client.get("/api/companies", params={"q": typo, "limit": 50})
+    assert r.status_code == 200
+    names = [c["company"] for c in r.json()["items"]]
+    assert first in names
+
+
 def test_rate_limit_returns_429(strict_client):
     # Burst is 2, so the third quick call is rejected with a Retry-After.
     assert strict_client.get("/api/stats").status_code == 200

@@ -23,8 +23,11 @@ _COMPANY_COLUMNS = """
 
 
 class CompaniesRepository:
-    def __init__(self, pool: DuckDBPool, stats_cache_ttl: float) -> None:
+    def __init__(
+        self, pool: DuckDBPool, stats_cache_ttl: float, fuzzy_threshold: float = 0.7
+    ) -> None:
         self._pool = pool
+        self._fuzzy_threshold = fuzzy_threshold
         # Bind the cache window from settings at construction time.
         self._stats_cached = ttl_cache(stats_cache_ttl)(self._stats_query)
         self._markets_cached = ttl_cache(stats_cache_ttl)(self._markets_query)
@@ -77,22 +80,52 @@ class CompaniesRepository:
         if f.market:
             where.append("country = ?")
             params.append(f.market)
-        if f.q:
-            where.append("company ILIKE ?")
-            params.append(f"%{f.q}%")
         if f.high_confidence:
             where.append("has_cert_identity = true")
+
+        q = (f.q or "").strip()
+        if q:
+            # Fuzzy name match: a substring hit, or a high Jaro-Winkler
+            # similarity, so a typo like "fortnet" still finds "Fortinet".
+            where.append(
+                "(company ILIKE ? "
+                "OR jaro_winkler_similarity(lower(company), lower(?)) >= ?)"
+            )
+            params += [f"%{q}%", q, self._fuzzy_threshold]
         clause = " AND ".join(where)
 
         total = self._scalar(f"SELECT count(*) FROM companies WHERE {clause}", params)
-        items = self._fetch(
-            f"""
-            SELECT {_COMPANY_COLUMNS}
-            FROM companies
-            WHERE {clause}
-            ORDER BY {f.sort.value} DESC, need_score DESC
-            LIMIT ? OFFSET ?
-            """,
-            params + [f.limit, f.offset],
-        )
+
+        if q:
+            # Rank by relevance first: a substring hit beats a fuzzy-only hit,
+            # then the requested sort, then need.
+            items = self._fetch(
+                f"""
+                WITH ranked AS (
+                    SELECT {_COMPANY_COLUMNS},
+                           GREATEST(
+                             CASE WHEN company ILIKE ? THEN 1.0 ELSE 0.0 END,
+                             jaro_winkler_similarity(lower(company), lower(?))
+                           ) AS relevance
+                    FROM companies
+                    WHERE {clause}
+                )
+                SELECT {_COMPANY_COLUMNS}
+                FROM ranked
+                ORDER BY relevance DESC, {f.sort.value} DESC, need_score DESC
+                LIMIT ? OFFSET ?
+                """,
+                [f"%{q}%", q] + params + [f.limit, f.offset],
+            )
+        else:
+            items = self._fetch(
+                f"""
+                SELECT {_COMPANY_COLUMNS}
+                FROM companies
+                WHERE {clause}
+                ORDER BY {f.sort.value} DESC, need_score DESC
+                LIMIT ? OFFSET ?
+                """,
+                params + [f.limit, f.offset],
+            )
         return {"total": total, "items": items}

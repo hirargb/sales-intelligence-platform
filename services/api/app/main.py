@@ -34,7 +34,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         size=settings.pool_size,
         acquire_timeout=settings.pool_acquire_timeout,
     )
-    repo = CompaniesRepository(pool, stats_cache_ttl=settings.stats_cache_ttl)
+    repo = CompaniesRepository(
+        pool,
+        stats_cache_ttl=settings.stats_cache_ttl,
+        fuzzy_threshold=settings.search_fuzzy_threshold,
+    )
     limiter = TokenBucketLimiter(rpm=settings.rate_limit_rpm, burst=settings.rate_limit_burst)
 
     @asynccontextmanager

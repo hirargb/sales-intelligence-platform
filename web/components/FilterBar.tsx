@@ -91,7 +91,7 @@ export function FilterBar({ markets }: { markets: Market[] }) {
           name="q"
           className={control}
           type="search"
-          placeholder="name contains..."
+          placeholder="search name (fuzzy)..."
           defaultValue={params.get("q") ?? ""}
         />
       </form>

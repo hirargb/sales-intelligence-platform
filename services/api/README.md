@@ -64,6 +64,7 @@ All settings take the `APP_` prefix, for example `APP_POOL_SIZE=8`.
 | `APP_RATE_LIMIT_RPM`   | `120`                 | Steady request rate per client.     |
 | `APP_RATE_LIMIT_BURST` | `40`                  | Bucket depth per client.            |
 | `APP_STATS_CACHE_TTL`  | `30`                  | Cache window for stats and markets. |
+| `APP_SEARCH_FUZZY_THRESHOLD` | `0.7`           | Minimum similarity for a fuzzy name match. |
 | `APP_CORS_ORIGINS`     | `["*"]`               | Browser origins allowed to call.    |
 
 ## Deploy to Cloud Run
