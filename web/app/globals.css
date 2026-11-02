@@ -1,0 +1,42 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #ffffff;
+  --panel: #fbfcfa;
+  --ink: #1a1d1a;
+  --muted: #5b6159;
+  --faint: #878d84;
+  --line: #eaecf0;
+  --accent: #7fba31;
+  --chip: #eef4e3;
+  --chip-ink: #4e7320;
+  --tile: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11130f;
+    --panel: #171a13;
+    --ink: #eef1ea;
+    --muted: #a7ada0;
+    --faint: #7c836f;
+    --line: #272b20;
+    --accent: #9bcf4f;
+    --chip: #223015;
+    --chip-ink: #9bcf4f;
+    --tile: #14170f;
+  }
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Geist", system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
