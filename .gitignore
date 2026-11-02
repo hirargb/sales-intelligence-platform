@@ -1,0 +1,21 @@
+# python
+**/__pycache__/
+*.pyc
+**/.venv/
+*.egg-info/
+**/.pytest_cache/
+
+# node / next
+**/node_modules/
+**/.next/
+**/next-env.d.ts
+
+# pipeline scratch and curated outputs (regenerate from pipeline/ and sql/)
+**/duck_tmp/
+pipeline/**/*.parquet
+sql/**/*.parquet
+
+# env and local
+**/.env
+**/.env.local
+.DS_Store
