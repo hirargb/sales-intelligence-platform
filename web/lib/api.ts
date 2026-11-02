@@ -58,6 +58,16 @@ export function getMarkets() {
   return getJSON<Market[]>("/api/markets");
 }
 
+export async function getCompany(name: string): Promise<Company | null> {
+  const res = await fetch(
+    `${BASE}/api/company?name=${encodeURIComponent(name)}`,
+    { cache: "no-store" }
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+  return (await res.json()) as Company;
+}
+
 export function getCompanies(query: CompanyQuery) {
   const p = new URLSearchParams();
   if (query.market) p.set("market", query.market);

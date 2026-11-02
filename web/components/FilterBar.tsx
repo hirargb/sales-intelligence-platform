@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import type { Market } from "@/lib/api";
+import { Select } from "@/components/Select";
 
 const SORTS = [
   { value: "priority", label: "Priority" },
@@ -30,40 +31,31 @@ export function FilterBar({ markets }: { markets: Market[] }) {
   );
 
   const control =
-    "rounded-lg border border-line bg-panel px-3 py-2 text-sm text-ink";
+    "rounded-lg border border-line bg-tile px-3 py-2 text-sm text-ink";
+
+  const marketOptions = [
+    { value: "", label: "All markets" },
+    ...markets.map((m) => ({
+      value: m.country,
+      label: `${m.country} (${m.companies.toLocaleString()})`,
+    })),
+  ];
 
   return (
     <div className="flex flex-wrap items-end gap-3">
-      <label className="flex flex-col gap-1">
-        <span className="text-xs text-faint">Market</span>
-        <select
-          className={control}
-          defaultValue={params.get("market") ?? ""}
-          onChange={(e) => setParam("market", e.target.value)}
-        >
-          <option value="">All markets</option>
-          {markets.map((m) => (
-            <option key={m.country} value={m.country}>
-              {m.country} ({m.companies.toLocaleString()})
-            </option>
-          ))}
-        </select>
-      </label>
+      <Select
+        label="Market"
+        value={params.get("market") ?? ""}
+        options={marketOptions}
+        onChange={(v) => setParam("market", v)}
+      />
 
-      <label className="flex flex-col gap-1">
-        <span className="text-xs text-faint">Sort by</span>
-        <select
-          className={control}
-          defaultValue={params.get("sort") ?? "priority"}
-          onChange={(e) => setParam("sort", e.target.value)}
-        >
-          {SORTS.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <Select
+        label="Sort by"
+        value={params.get("sort") ?? "priority"}
+        options={SORTS}
+        onChange={(v) => setParam("sort", v)}
+      />
 
       <label className="flex flex-col gap-1">
         <span className="text-xs text-faint">Minimum need</span>

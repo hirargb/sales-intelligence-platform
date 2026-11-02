@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Company } from "@/lib/api";
 
 function Bar({ label, value }: { label: string; value: number }) {
@@ -19,7 +20,10 @@ function Bar({ label, value }: { label: string; value: number }) {
 
 export function CompanyCard({ company }: { company: Company }) {
   return (
-    <article className="rounded-xl border border-line bg-tile p-4">
+    <Link
+      href={`/company/${encodeURIComponent(company.company)}`}
+      className="block rounded-xl border border-line bg-tile p-4 transition-colors hover:border-accent"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="truncate text-base font-semibold">
@@ -60,6 +64,6 @@ export function CompanyCard({ company }: { company: Company }) {
           </li>
         ))}
       </ul>
-    </article>
+    </Link>
   );
 }

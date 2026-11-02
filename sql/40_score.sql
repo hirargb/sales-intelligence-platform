@@ -136,7 +136,13 @@ CREATE OR REPLACE TABLE ranked AS
     -- A large surface with no certificate identity is almost always a hosting
     -- provider resolved by reverse DNS, not one company. Real large companies
     -- carry a certificate org somewhere. Keep small domain-only companies.
-    AND NOT (has_cert_identity = false AND exposed_ips > 200);
+    AND NOT (has_cert_identity = false AND exposed_ips > 200)
+    -- Drop junk names: placeholders, single tokens, pure numbers, IP literals.
+    -- The letter test uses \p{L}, so it keeps non-Latin names (for example CJK).
+    AND length(trim(company)) >= 3
+    AND regexp_matches(company, '\p{L}.*\p{L}')
+    AND NOT regexp_matches(lower(trim(company)),
+        '^(company|company name|unknown|none|null|test|testing|localhost|example|examples|default|server|servers|acme|n/?a|host|hostname|admin|administrator|user|users|root|guest|guestuser|internet widgits.*|some ?company|some ?organization|my ?company|organization|org|changeme|self[- ]?signed|certificate|ssl|tls|device|router|gateway|ltd|inc|llc|co|corp|corporation|gmbh|srl|spa|pty|waf|system:.*)$');
 
 -- Persist for the thin app (includes the confidence flag so the app can filter).
 COPY (SELECT company, need_score, fit_score, priority, country,

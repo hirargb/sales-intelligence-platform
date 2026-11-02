@@ -73,6 +73,14 @@ class CompaniesRepository:
     def markets(self) -> list[dict]:
         return self._markets_cached()
 
+    @timed("get_company")
+    def get_company(self, name: str) -> dict | None:
+        rows = self._fetch(
+            f"SELECT {_COMPANY_COLUMNS} FROM companies WHERE company = ? LIMIT 1",
+            [name],
+        )
+        return rows[0] if rows else None
+
     @timed("list_companies")
     def list_companies(self, f: CompanyFilters) -> dict:
         where = ["need_score >= ?"]

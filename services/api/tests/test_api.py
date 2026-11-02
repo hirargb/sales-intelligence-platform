@@ -64,6 +64,20 @@ def test_bad_sort_rejected(client):
     assert client.get("/api/companies?sort=company").status_code == 422
 
 
+def test_company_detail(client):
+    name = client.get("/api/companies?limit=1").json()["items"][0]["company"]
+    r = client.get("/api/company", params={"name": name})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["company"] == name
+    assert isinstance(body["reasons"], list)
+
+
+def test_company_detail_404(client):
+    r = client.get("/api/company", params={"name": "no-such-company-zzz-000"})
+    assert r.status_code == 404
+
+
 def test_fuzzy_search_tolerates_typo(client):
     # Take a real company, swap two adjacent characters, and expect the fuzzy
     # search to still find it.

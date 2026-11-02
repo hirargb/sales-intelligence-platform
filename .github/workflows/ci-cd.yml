@@ -55,7 +55,7 @@ jobs:
 
       - name: Deploy API
         run: |
-          gcloud run deploy firmable-api \
+          gcloud run deploy sales-intelligence-api \
             --source services/api \
             --project "${{ secrets.GCP_PROJECT }}" \
             --region "${{ secrets.GCP_REGION }}" \
@@ -65,7 +65,7 @@ jobs:
       - name: Capture API URL
         id: api
         run: |
-          url=$(gcloud run services describe firmable-api \
+          url=$(gcloud run services describe sales-intelligence-api \
             --project "${{ secrets.GCP_PROJECT }}" \
             --region "${{ secrets.GCP_REGION }}" \
             --format 'value(status.url)')
@@ -73,7 +73,7 @@ jobs:
 
       - name: Deploy Web
         run: |
-          gcloud run deploy firmable-web \
+          gcloud run deploy sales-intelligence-platform \
             --source web \
             --project "${{ secrets.GCP_PROJECT }}" \
             --region "${{ secrets.GCP_REGION }}" \
