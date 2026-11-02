@@ -1,40 +1,66 @@
 # Account Prioritizer
 
-Rank the companies most likely to buy cybersecurity software, from internet-scan
-data, with a plain reason for each rank.
+This tool ranks the companies most likely to buy cybersecurity software. The
+input is internet-scan data. The output is a ranked company list. Each company
+shows a plain reason for its rank.
+
+## Project flow
+
+This diagram shows the stages from the raw file to the app.
+
+```mermaid
+flowchart LR
+  R["Raw scan file<br/>17.6 GB zst"] --> I["Ingest<br/>slim Parquet"]
+  I --> RES["Resolve<br/>remove infrastructure"]
+  RES --> SC["Score<br/>need and fit, reasons"]
+  SC --> OUT["scored.parquet"]
+  OUT --> API["API<br/>FastAPI + DuckDB"]
+  API --> WEB["Web app"]
+```
+
+The full architecture, the fast and slow lanes, the request flow, and the
+idempotency flow are in `ARCHITECTURE.md`.
 
 ## Repository layout
 
 ```
-pipeline/        Ingestion. Raw scan files -> curated Parquet. Streaming, idempotent, incremental.
-sql/             Resolution and scoring. Turns scan records into ranked companies with reasons.
+pipeline/        Ingest raw scan files to curated Parquet. Streaming, idempotent, incremental.
+sql/             Resolve entities, then score. Attach a reason list to each company.
 services/api/    FastAPI serving layer. Connection pool, rate limit, Pydantic contract, tests.
-web/             Thin Next.js app. Server-rendered account list the sales team uses.
-ARCHITECTURE.md  How the system scales from one file to a thousand a month.
+web/             Thin Next.js app. Server-rendered account list for the sales team.
+ARCHITECTURE.md  System design and diagrams.
 ```
 
-## How the parts map to what is graded
+## How the parts map to the grade
 
-1. **Signal insight.** `sql/30_resolve.sql` and `sql/40_score.sql`. The core
+1. Signal insight. See `sql/30_resolve.sql` and `sql/40_score.sql`. The main
    finding: resolve before you score, or you rank hosting providers.
-2. **Ingestion that scales.** `pipeline/`. Per-file, content-hash idempotent,
-   incremental. `ARCHITECTURE.md` covers the event-driven and warehouse growth.
-3. **Transparent scoring.** Separate need and fit scores. Every point maps to a
-   named signal, and each company carries a reason list. No black box, no model
-   in the ranking path.
-4. **Measurement.** The API has contract tests (`services/api/tests/`). The SQL
-   scoring has logic tests in the pipeline. The ranking-quality plan uses a
-   hand-labeled set and precision at k.
-5. **Thin app.** `web/`. Server-rendered, one screen, the least interesting part
-   by design.
+2. Ingestion that scales. See `pipeline/`. The worker runs per file. It is
+   idempotent by content hash. It is incremental.
+3. Transparent scoring. The need score and the fit score are separate. Each
+   point maps to a named signal. Each company carries a reason list.
+4. Measurement. The API has contract tests in `services/api/tests/`. The ranking
+   plan uses a hand-labelled set and precision at k.
+5. Thin app. See `web/`. The app is one screen. It is the least important part by
+   design.
 
 ## Run
 
-- API: see `services/api/README.md`.
-- Web: `cd web && yarn install && yarn dev`. Set `API_URL` to the API base.
-- Pipeline and SQL: see `pipeline/README.md` and the comments in `sql/`.
+1. API. See `services/api/README.md`.
+2. Web. Run: cd web, then yarn install, then yarn dev. Set API_URL to the API
+   base address.
+3. Pipeline and SQL. See `pipeline/README.md` and the comments in `sql/`.
 
 ## Deploy
 
-Both the API and the web app deploy to Cloud Run from source, built in the cloud
-by Buildpacks. No local container runtime is needed. See `services/api/README.md`.
+1. The API and the web app deploy to Cloud Run from source.
+2. Buildpacks build the image in the cloud. No local container runtime is needed.
+3. See `services/api/README.md` for the deploy command.
+
+## Render the diagrams
+
+GitHub renders Mermaid in Markdown automatically. To render the diagrams on your
+machine, do one step.
+
+1. Install the Mermaid CLI. Run: yarn global add @mermaid-js/mermaid-cli
+2. Or install the VS Code extension "Markdown Preview Mermaid Support".
