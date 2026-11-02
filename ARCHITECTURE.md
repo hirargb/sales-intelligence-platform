@@ -181,5 +181,5 @@ This repository ships a runnable slice of the design.
 3. The serving API is in `services/api/`.
 4. The thin web app is in `web/`.
 
-The fast lane, the orchestrator, and the warehouse engines are in this document.
-They are the next build. They are not simulated.
+This document describes the fast lane, the orchestrator, and the warehouse
+engines. The repository does not build them yet.
