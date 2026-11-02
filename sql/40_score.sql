@@ -25,6 +25,7 @@ CREATE OR REPLACE TABLE infra_domains AS
 
 CREATE OR REPLACE TABLE dedup AS
   SELECT ip_str, port, transport, module, domains, cert_subject_o,
+         product, vuln_cves,
          vuln_count, max_cvss, any_kev, tags, ssl_versions,
          ssl_cert_expired, http_waf, http_title, country_code
   FROM (
@@ -97,6 +98,39 @@ CREATE OR REPLACE TABLE company_features AS
           'server|hosting|\.host|vps|cloud|datacenter|dedibox|dedi|\.arpa|reverse-dns')
   GROUP BY company;
 
+-- ---- named evidence for the sales case (CVE ids and services, no hostnames) ----
+-- Hostnames and IPs are left out on purpose. The app is public, and a CVE plus a
+-- live hostname would be an attack map. The CVE and the service are enough for a
+-- credible sales opener.
+CREATE OR REPLACE TABLE evidence AS
+WITH base AS (
+  SELECT company, product, port, max_cvss, vuln_cves, any_kev
+  FROM resolved WHERE company IS NOT NULL
+),
+kev AS (
+  SELECT company, list_slice(list_sort(array_agg(DISTINCT cve)), 1, 6) AS kev_cves
+  FROM (SELECT company, unnest(vuln_cves) AS cve FROM base WHERE any_kev AND vuln_cves IS NOT NULL)
+  GROUP BY company
+),
+agg AS (
+  SELECT company,
+    arg_max(format('{} (port {})', coalesce(nullif(product,''), 'service'), port), max_cvss)
+      FILTER (WHERE max_cvss > 0) AS worst_service,
+    list_distinct(array_agg(CASE port
+        WHEN 3306 THEN 'MySQL (port 3306)' WHEN 5432 THEN 'PostgreSQL (port 5432)'
+        WHEN 1433 THEN 'MSSQL (port 1433)' WHEN 27017 THEN 'MongoDB (port 27017)'
+        WHEN 9200 THEN 'Elasticsearch (port 9200)' WHEN 6379 THEN 'Redis (port 6379)'
+        WHEN 11211 THEN 'Memcached (port 11211)' END)
+      FILTER (WHERE port IN (3306,5432,1433,27017,9200,6379,11211))) AS db_services,
+    list_distinct(array_agg(CASE port
+        WHEN 3389 THEN 'RDP (port 3389)' WHEN 5900 THEN 'VNC (port 5900)'
+        WHEN 23 THEN 'Telnet (port 23)' WHEN 445 THEN 'SMB (port 445)' END)
+      FILTER (WHERE port IN (3389,5900,23,445))) AS remote_services
+  FROM base GROUP BY company
+)
+SELECT a.company, k.kev_cves, a.worst_service, a.db_services, a.remote_services
+FROM agg a LEFT JOIN kev k USING (company);
+
 -- ---- scores and reasons ----
 CREATE OR REPLACE TABLE scored AS
   SELECT *,
@@ -142,14 +176,18 @@ CREATE OR REPLACE TABLE ranked AS
     AND length(trim(company)) >= 3
     AND regexp_matches(company, '\p{L}.*\p{L}')
     AND NOT regexp_matches(lower(trim(company)),
-        '^(company|company name|unknown|none|null|test|testing|localhost|example|examples|default|server|servers|acme|n/?a|host|hostname|admin|administrator|user|users|root|guest|guestuser|internet widgits.*|some ?company|some ?organization|my ?company|organization|org|changeme|self[- ]?signed|certificate|ssl|tls|device|router|gateway|ltd|inc|llc|co|corp|corporation|gmbh|srl|spa|pty|waf|system:.*)$');
+        '^(company|company ?name|companyname|org ?name|orgname|unknown|none|null|test|testing|localhost|localdomain|example.*|sample.*|default|server|servers|acme|n/?a|host|hostname|admin|administrator|user|users|root|guest|guestuser|internet widgits.*|some ?company|some ?organization|my ?company|your ?company|yourcompany|organization|org|changeme|self[- ]?signed|certificate|ssl|tls|device|router|gateway|ltd|inc|llc|co|corp|corporation|gmbh|srl|spa|pty|waf|system:.*)$');
 
 -- Persist for the thin app (includes the confidence flag so the app can filter).
-COPY (SELECT company, need_score, fit_score, priority, country,
+COPY (SELECT r.company, need_score, fit_score, priority, country,
              exposed_ips, distinct_ports, n_kev, worst_cvss, n_db,
              n_remote, n_legacy, n_eol, n_compromised,
-             has_cert_identity, reasons
-      FROM ranked)
+             has_cert_identity, reasons,
+             coalesce(e.kev_cves, []::VARCHAR[])        AS kev_cves,
+             e.worst_service,
+             coalesce(e.db_services, []::VARCHAR[])     AS db_services,
+             coalesce(e.remote_services, []::VARCHAR[]) AS remote_services
+      FROM ranked r LEFT JOIN evidence e USING (company))
   TO '/root/shodan/scored.parquet' (FORMAT parquet, COMPRESSION zstd);
 
 -- High-confidence leaderboard: companies identified by a real certificate

@@ -21,6 +21,10 @@ export type Company = {
   n_compromised: number;
   has_cert_identity: boolean;
   reasons: string[];
+  kev_cves: string[];
+  worst_service: string | null;
+  db_services: string[];
+  remote_services: string[];
 };
 
 export type Stats = {

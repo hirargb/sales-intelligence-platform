@@ -65,6 +65,12 @@ class Company(BaseModel):
     n_compromised: int
     has_cert_identity: bool
     reasons: list[str]
+    # Named evidence, company-level only. No hostnames or IPs, so a public page
+    # cannot become an attack map for a real company.
+    kev_cves: list[str] = []
+    worst_service: str | None = None
+    db_services: list[str] = []
+    remote_services: list[str] = []
 
 
 class CompanyPage(BaseModel):

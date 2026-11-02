@@ -26,7 +26,8 @@ _COMPANY_COLUMNS = """
     company, need_score, fit_score, priority, country,
     exposed_ips, distinct_ports, n_kev, worst_cvss, n_db,
     n_remote, n_legacy, n_eol, n_compromised,
-    has_cert_identity, reasons
+    has_cert_identity, reasons,
+    kev_cves, worst_service, db_services, remote_services
 """
 
 

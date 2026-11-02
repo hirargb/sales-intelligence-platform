@@ -203,9 +203,27 @@ work, not a one-time fix.
 
 The app ranks multi-host companies. A rule of at least two exposed hosts drops the
 single-host long tail, so the 325,094 candidates become 58,078 ranked companies.
-The name-quality filter then removes 171 junk names, which leaves 57,907 companies
-in the live app. Of those, 5,895 carry a certificate identity, the high-confidence
+The name-quality filter then removes 179 junk names, which leaves 57,899 companies
+in the live app. Of those, 5,890 carry a certificate identity, the high-confidence
 buyer list.
+
+## Named evidence, and what I withhold
+
+A count tells a rep the scale. A name gives them the opener. So each company also
+carries the named evidence: the CVEs found on its known-exploited services, the
+worst service by CVSS with its product and port, and which databases and
+remote-desktops are exposed. The scan file holds all of this, in vuln_cves,
+product, and port.
+
+I draw a hard line at host level. The app is public, and a CVE next to a live
+hostname is a map of how to break into a real company. So the evidence is
+company-level only, with no hostnames and no IP addresses. The CVE and the service
+are enough for a credible call, and the host-level detail belongs behind a login
+in the real product.
+
+One honesty note on the CVEs. The slim data keeps a per-service known-exploited
+flag, not a per-CVE one, so the CVE list is the set found on the flagged services,
+where at least one is known-exploited. The app labels it that way.
 
 ## What I would do next
 

@@ -40,6 +40,12 @@ export default async function CompanyPage({
     !company.company.includes(" ")
       ? `https://${company.company}`
       : null;
+  const hasEvidence =
+    !!company &&
+    (!!company.worst_service ||
+      company.kev_cves.length > 0 ||
+      company.db_services.length > 0 ||
+      company.remote_services.length > 0);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
@@ -114,6 +120,60 @@ export default async function CompanyPage({
               </li>
             ))}
           </ul>
+
+          {hasEvidence && (
+            <>
+              <h2 className="mt-8 text-sm font-semibold">Evidence</h2>
+              <div className="mt-2 space-y-2 text-sm text-muted">
+                {company.worst_service && (
+                  <p>
+                    Worst service:{" "}
+                    <span className="text-ink">{company.worst_service}</span>, CVSS{" "}
+                    {company.worst_cvss.toFixed(1)}
+                  </p>
+                )}
+                {company.kev_cves.length > 0 && (
+                  <p>
+                    CVEs on flagged services:{" "}
+                    {company.kev_cves.map((cve, i) => (
+                      <span key={cve}>
+                        {i > 0 && ", "}
+                        <a
+                          href={`https://nvd.nist.gov/vuln/detail/${cve}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-accent"
+                        >
+                          {cve}
+                        </a>
+                      </span>
+                    ))}
+                    . At least one is on the known-exploited list.
+                  </p>
+                )}
+                {company.db_services.length > 0 && (
+                  <p>
+                    Exposed databases:{" "}
+                    <span className="text-ink">
+                      {company.db_services.join(", ")}
+                    </span>
+                  </p>
+                )}
+                {company.remote_services.length > 0 && (
+                  <p>
+                    Exposed remote access:{" "}
+                    <span className="text-ink">
+                      {company.remote_services.join(", ")}
+                    </span>
+                  </p>
+                )}
+              </div>
+              <p className="mt-2 text-xs text-faint">
+                Host-level detail, which host and which address, is withheld on
+                this public demo.
+              </p>
+            </>
+          )}
 
           <h2 className="mt-8 text-sm font-semibold">Exposure</h2>
           <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">

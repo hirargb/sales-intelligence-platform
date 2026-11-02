@@ -23,7 +23,7 @@ I then measure four things:
 
 ## What it shows
 
-The population is 57,907 companies. In the whole set, 21.4 percent have a concrete
+The population is 57,899 companies. In the whole set, 21.4 percent have a concrete
 problem and 10.2 percent carry a certificate identity. Against that baseline:
 
 | k   | concrete problem | lift | certificate identity |
@@ -31,7 +31,7 @@ problem and 10.2 percent carry a certificate identity. Against that baseline:
 | 20  | 1.00             | 4.68 | 0.00                 |
 | 50  | 1.00             | 4.68 | 0.00                 |
 | 100 | 1.00             | 4.68 | 0.01                 |
-| 500 | 1.00             | 4.68 | 0.05                 |
+| 500 | 1.00             | 4.68 | 0.04                 |
 
 The top of the list is clean. Every one of the top 500 companies has a concrete,
 sellable problem, which is 4.68 times the base rate. The reasons hold up too. On

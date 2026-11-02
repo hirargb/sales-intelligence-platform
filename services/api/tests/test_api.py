@@ -81,6 +81,11 @@ def test_company_detail(client):
     body = r.json()
     assert body["company"] == name
     assert isinstance(body["reasons"], list)
+    # Named evidence is present and typed, with no hostnames (company-level only).
+    assert isinstance(body["kev_cves"], list)
+    assert isinstance(body["db_services"], list)
+    assert isinstance(body["remote_services"], list)
+    assert "worst_service" in body
 
 
 def test_company_detail_404(client):
