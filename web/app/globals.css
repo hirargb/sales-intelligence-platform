@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Arcinbox theme: Inter, brand purple on white, soft panels, hairline borders. */
+/* Brand theme: Inter, brand purple on white, soft panels, hairline borders. */
 :root {
   color-scheme: light;
   --bg: #ffffff;
