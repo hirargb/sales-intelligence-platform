@@ -28,19 +28,24 @@ pipeline/        Ingest raw scan files to curated Parquet. Streaming, idempotent
 sql/             Resolve entities, then score. Attach a reason list to each company.
 services/api/    FastAPI serving layer. Connection pool, rate limit, Pydantic contract, tests.
 web/             Thin Next.js app. Server-rendered account list for the sales team.
+signals.md       Ranked signal thesis: each signal, its evidence, and its weight.
+data-profile.md  By-hand profile of the full file: schema, fill rates, measured signals.
 ARCHITECTURE.md  System design and diagrams.
 ```
 
 ## How the parts map to the grade
 
-1. Signal insight. See `sql/30_resolve.sql` and `sql/40_score.sql`. The main
-   finding: resolve before you score, or you rank hosting providers.
+1. Signal insight. See `signals.md` for the ranked signal thesis and
+   `data-profile.md` for the by-hand profile. The main finding: resolve before
+   you score, or you rank hosting providers. The resolution and scoring run in
+   `sql/30_resolve.sql` and `sql/40_score.sql`.
 2. Ingestion that scales. See `pipeline/`. The worker runs per file. It is
    idempotent by content hash. It is incremental.
 3. Transparent scoring. The need score and the fit score are separate. Each
    point maps to a named signal. Each company carries a reason list.
-4. Measurement. The API has contract tests in `services/api/tests/`. The ranking
-   plan uses a hand-labelled set and precision at k.
+4. Measurement. The API and the SQL scoring have contract tests in
+   `services/api/tests/`. The ranking-quality plan, a hand-labelled set and
+   precision at k, is in `signals.md` and `data-profile.md`.
 5. Thin app. See `web/`. The app is one screen. It is the least important part by
    design.
 
