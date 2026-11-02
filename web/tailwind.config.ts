@@ -17,7 +17,7 @@ const config: Config = {
         tile: "var(--tile)",
       },
       fontFamily: {
-        sans: ["Geist", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["Inter", "Arial", "Helvetica", "sans-serif"],
       },
     },
   },

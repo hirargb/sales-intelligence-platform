@@ -1,34 +1,21 @@
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Arcinbox theme: Inter, brand purple on white, soft panels, hairline borders. */
 :root {
+  color-scheme: light;
   --bg: #ffffff;
-  --panel: #fbfcfa;
-  --ink: #1a1d1a;
-  --muted: #5b6159;
-  --faint: #878d84;
-  --line: #eaecf0;
-  --accent: #7fba31;
-  --chip: #eef4e3;
-  --chip-ink: #4e7320;
+  --panel: #faf9fc;
+  --ink: #24232c;
+  --muted: #6f6678;
+  --faint: #8a7894;
+  --line: #eae8ef;
+  --accent: #6745ee;
+  --chip: #f0eafa;
+  --chip-ink: #6745bb;
   --tile: #ffffff;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #11130f;
-    --panel: #171a13;
-    --ink: #eef1ea;
-    --muted: #a7ada0;
-    --faint: #7c836f;
-    --line: #272b20;
-    --accent: #9bcf4f;
-    --chip: #223015;
-    --chip-ink: #9bcf4f;
-    --tile: #14170f;
-  }
 }
 
 html,
@@ -36,7 +23,18 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: "Geist", system-ui, -apple-system, sans-serif;
+  font-family: "Inter", Arial, Helvetica, sans-serif;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--chip);
+  color: var(--chip-ink);
 }
