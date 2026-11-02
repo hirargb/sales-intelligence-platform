@@ -1,0 +1,83 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  api:
+    name: API tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv venv
+      - run: uv pip install -e ".[test]"
+      - run: uv run pytest -q
+
+  web:
+    name: Web build and tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: corepack enable
+      - run: yarn install --frozen-lockfile
+      - run: yarn test
+      - run: yarn build
+
+  deploy:
+    name: Deploy to Cloud Run
+    needs: [api, web]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOY_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy API
+        run: |
+          gcloud run deploy firmable-api \
+            --source services/api \
+            --project "${{ secrets.GCP_PROJECT }}" \
+            --region "${{ secrets.GCP_REGION }}" \
+            --allow-unauthenticated --memory 1Gi \
+            --set-env-vars APP_POOL_SIZE=8 --quiet
+
+      - name: Capture API URL
+        id: api
+        run: |
+          url=$(gcloud run services describe firmable-api \
+            --project "${{ secrets.GCP_PROJECT }}" \
+            --region "${{ secrets.GCP_REGION }}" \
+            --format 'value(status.url)')
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy Web
+        run: |
+          gcloud run deploy firmable-web \
+            --source web \
+            --project "${{ secrets.GCP_PROJECT }}" \
+            --region "${{ secrets.GCP_REGION }}" \
+            --allow-unauthenticated --memory 1Gi \
+            --set-env-vars "API_URL=${{ steps.api.outputs.url }}" --quiet
