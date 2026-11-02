@@ -55,6 +55,16 @@ def test_high_confidence_filter(client):
     assert all(c["has_cert_identity"] for c in r.json()["items"])
 
 
+def test_size_filter(client):
+    r = client.get("/api/companies", params={"size": "small", "limit": 50})
+    assert r.status_code == 200
+    assert all(2 <= c["exposed_ips"] <= 9 for c in r.json()["items"])
+
+
+def test_bad_size_rejected(client):
+    assert client.get("/api/companies?size=huge").status_code == 422
+
+
 def test_limit_cap_rejected(client):
     # Over the max page size is a validation error, not a silent clamp.
     assert client.get("/api/companies?limit=500").status_code == 422

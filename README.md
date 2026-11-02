@@ -82,3 +82,24 @@ could read a company's certificate name and hostnames and return a structured
 industry and size band. It would be a named, versioned tool, with a schema, a cost
 ceiling, a trace, and an eval set. It would stay out of the ranking and only label
 a company for a filter. That is the next build.
+
+## How a salesperson uses this
+
+A rep starts from a market, sorts by priority, and opens each account on its hook:
+a specific, timely security problem to lead the call with, such as a
+known-exploited CVE on an exposed service. The verified-identity filter narrows
+the list to companies named by a certificate, which is the cleaner buyer list. The
+surface-size filter stands in for company size. Each account links out to its
+website, so the rep can go look.
+
+This tool is the intent layer. It reads exposure and turns it into a ranked reason
+to call. It does not carry firmographics or contacts, because the scan file does
+not hold them. In a full sales intelligence platform, this layer joins onto a
+company and people graph: the scan gives the timely reason, and the firmographic
+and contact data gives the industry, the size, and the person to reach. The
+product is the join.
+
+So the next data steps are a firmographic enrichment for industry and size, a
+contact join for the decision-maker, and the DNS email-auth read planned in
+`docs/signals.md`. Each one adds a column the scan cannot, and each keeps the
+scoring deterministic and auditable.

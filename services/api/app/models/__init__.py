@@ -6,6 +6,7 @@ from app.models.schemas import (
     CompanyPage,
     Health,
     Market,
+    SizeBand,
     SortKey,
     Stats,
 )
@@ -16,6 +17,7 @@ __all__ = [
     "CompanyPage",
     "Health",
     "Market",
+    "SizeBand",
     "SortKey",
     "Stats",
 ]

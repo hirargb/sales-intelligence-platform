@@ -34,6 +34,12 @@ export default async function CompanyPage({
 }) {
   const name = decodeURIComponent(params.name);
   const company = await getCompany(name).catch(() => null);
+  const website =
+    company &&
+    /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(company.company) &&
+    !company.company.includes(" ")
+      ? `https://${company.company}`
+      : null;
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
@@ -67,6 +73,16 @@ export default async function CompanyPage({
                   {company.exposed_ips.toLocaleString()} exposed hosts across{" "}
                   {company.distinct_ports} ports
                 </span>
+                {website && (
+                  <a
+                    href={website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent"
+                  >
+                    Visit website &#8599;
+                  </a>
+                )}
               </div>
             </div>
             <div className="shrink-0 text-right">
@@ -76,6 +92,13 @@ export default async function CompanyPage({
               <div className="text-xs text-faint">priority</div>
             </div>
           </header>
+
+          {company.reasons[0] && (
+            <div className="mt-6 rounded-lg bg-chip px-4 py-3">
+              <div className="text-xs font-semibold text-chipInk">Opening hook</div>
+              <div className="mt-1 text-sm text-chipInk">{company.reasons[0]}</div>
+            </div>
+          )}
 
           <div className="mt-6 grid grid-cols-2 gap-3">
             <Bar label="Need" value={company.need_score} />

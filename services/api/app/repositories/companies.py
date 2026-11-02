@@ -12,6 +12,14 @@ from app.core.decorators import timed, ttl_cache
 from app.db import DuckDBPool
 from app.models import CompanyFilters
 
+# Surface-size bands, keyed by exposed-host count. xlarge has no upper bound.
+_SIZE_BANDS = {
+    "small": (2, 9),
+    "medium": (10, 49),
+    "large": (50, 199),
+    "xlarge": (200, None),
+}
+
 # Columns returned for each company. Kept explicit so the API contract does not
 # drift when the scoring step adds a column.
 _COMPANY_COLUMNS = """
@@ -90,6 +98,13 @@ class CompaniesRepository:
             params.append(f.market)
         if f.high_confidence:
             where.append("has_cert_identity = true")
+        if f.size:
+            lo, hi = _SIZE_BANDS[f.size.value]
+            where.append("exposed_ips >= ?")
+            params.append(lo)
+            if hi is not None:
+                where.append("exposed_ips <= ?")
+                params.append(hi)
 
         q = (f.q or "").strip()
         if q:

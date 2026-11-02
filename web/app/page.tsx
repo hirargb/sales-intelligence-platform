@@ -27,6 +27,7 @@ export default async function Page({
     q: str(searchParams.q),
     minNeed: Number(str(searchParams.min_need) ?? 0) || 0,
     highConfidence: str(searchParams.high_confidence) === "true",
+    size: str(searchParams.size),
     sort: str(searchParams.sort) ?? "priority",
     limit: 50,
   };

@@ -51,13 +51,19 @@ export function CompanyCard({ company }: { company: Company }) {
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      {company.reasons[0] && (
+        <p className="mt-3 rounded-lg bg-chip px-3 py-2 text-sm text-chipInk">
+          {company.reasons[0]}
+        </p>
+      )}
+
+      <div className="mt-4 grid grid-cols-2 gap-3">
         <Bar label="Need" value={company.need_score} />
         <Bar label="Fit" value={company.fit_score} />
       </div>
 
       <ul className="mt-3 space-y-1">
-        {company.reasons.map((r) => (
+        {company.reasons.slice(1).map((r) => (
           <li key={r} className="flex gap-2 text-sm text-muted">
             <span className="text-accent">-</span>
             <span>{r}</span>

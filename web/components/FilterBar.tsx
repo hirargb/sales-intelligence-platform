@@ -13,6 +13,14 @@ const SORTS = [
   { value: "n_kev", label: "Known-exploited CVEs" },
 ];
 
+const SIZES = [
+  { value: "", label: "Any surface" },
+  { value: "small", label: "Small (2-9 hosts)" },
+  { value: "medium", label: "Medium (10-49)" },
+  { value: "large", label: "Large (50-199)" },
+  { value: "xlarge", label: "Very large (200+)" },
+];
+
 export function FilterBar({ markets }: { markets: Market[] }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -48,6 +56,13 @@ export function FilterBar({ markets }: { markets: Market[] }) {
         value={params.get("market") ?? ""}
         options={marketOptions}
         onChange={(v) => setParam("market", v)}
+      />
+
+      <Select
+        label="Surface size"
+        value={params.get("size") ?? ""}
+        options={SIZES}
+        onChange={(v) => setParam("size", v)}
       />
 
       <Select

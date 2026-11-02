@@ -36,6 +36,7 @@ export type CompanyQuery = {
   q?: string;
   minNeed?: number;
   highConfidence?: boolean;
+  size?: string;
   sort?: string;
   limit?: number;
   offset?: number;
@@ -74,6 +75,7 @@ export function getCompanies(query: CompanyQuery) {
   if (query.q) p.set("q", query.q);
   if (query.minNeed) p.set("min_need", String(query.minNeed));
   if (query.highConfidence) p.set("high_confidence", "true");
+  if (query.size) p.set("size", query.size);
   if (query.sort) p.set("sort", query.sort);
   p.set("limit", String(query.limit ?? 50));
   p.set("offset", String(query.offset ?? 0));

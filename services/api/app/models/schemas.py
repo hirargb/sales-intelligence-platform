@@ -22,6 +22,15 @@ class SortKey(str, Enum):
     n_kev = "n_kev"
 
 
+class SizeBand(str, Enum):
+    """Surface-size bands, a rough proxy for company size by exposed hosts."""
+
+    small = "small"
+    medium = "medium"
+    large = "large"
+    xlarge = "xlarge"
+
+
 class CompanyFilters(BaseModel):
     """Validated query parameters for the company list."""
 
@@ -30,6 +39,9 @@ class CompanyFilters(BaseModel):
     min_need: float = Field(default=0, ge=0, le=100, description="Minimum need score.")
     high_confidence: bool = Field(
         default=False, description="Only companies identified by a certificate."
+    )
+    size: SizeBand | None = Field(
+        default=None, description="Filter by surface-size band (exposed hosts)."
     )
     sort: SortKey = Field(default=SortKey.priority)
     limit: int = Field(default=50, ge=1, le=200)
