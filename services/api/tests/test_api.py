@@ -93,6 +93,61 @@ def test_company_detail_404(client):
     assert r.status_code == 404
 
 
+def test_evidence_actually_populates(client):
+    # Type checks pass even if the evidence join silently returns empty lists.
+    # This asserts the wiring is live: across the top of the ranked list, at
+    # least one company carries a named service and at least one carries a CVE.
+    items = client.get("/api/companies?limit=50").json()["items"]
+    assert any(c["worst_service"] for c in items)
+    assert any(len(c["kev_cves"]) > 0 for c in items)
+
+
+def test_detail_matches_list_row(client):
+    # The same company must read the same in the list and on its detail page.
+    row = client.get("/api/companies?limit=1").json()["items"][0]
+    detail = client.get("/api/company", params={"name": row["company"]}).json()
+    for field in ("priority", "need_score", "worst_service", "kev_cves", "reasons"):
+        assert detail[field] == row[field]
+
+
+def test_market_filter(client):
+    market = client.get("/api/markets").json()[0]["country"]
+    r = client.get("/api/companies", params={"market": market, "limit": 50})
+    assert r.status_code == 200
+    assert all(c["country"] == market for c in r.json()["items"])
+
+
+def test_min_need_filter(client):
+    r = client.get("/api/companies", params={"min_need": 50, "limit": 50})
+    assert r.status_code == 200
+    assert all(c["need_score"] >= 50 for c in r.json()["items"])
+
+
+def test_xlarge_size_has_no_upper_bound(client):
+    r = client.get("/api/companies", params={"size": "xlarge", "limit": 50})
+    assert r.status_code == 200
+    assert all(c["exposed_ips"] >= 200 for c in r.json()["items"])
+
+
+def test_offset_pages_forward(client):
+    first = client.get("/api/companies?limit=5&offset=0").json()["items"]
+    second = client.get("/api/companies?limit=5&offset=5").json()["items"]
+    first_names = {c["company"] for c in first}
+    second_names = {c["company"] for c in second}
+    assert first_names and second_names
+    assert first_names.isdisjoint(second_names)
+
+
+def test_fuzzy_ranks_exact_match_first(client):
+    # An exact-name query must return that company as the first, most relevant
+    # result, above any fuzzy-only neighbours.
+    name = client.get("/api/companies?limit=1").json()["items"][0]["company"]
+    r = client.get("/api/companies", params={"q": name, "limit": 10})
+    assert r.status_code == 200
+    items = r.json()["items"]
+    assert items and items[0]["company"] == name
+
+
 def test_fuzzy_search_tolerates_typo(client):
     # Take a real company, swap two adjacent characters, and expect the fuzzy
     # search to still find it.
